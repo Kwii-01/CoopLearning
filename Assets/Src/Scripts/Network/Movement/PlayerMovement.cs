@@ -51,12 +51,15 @@ public class PlayerMovement : NetworkBehaviour {
         if (this._previousTransformState == null) {
             this._previousTransformState = serverState;
         }
-        int bufferIndex = Array.FindIndex(this._tranformStates, state => state.Tick == serverState.Tick);
+        int bufferIndex = Array.FindIndex(this._tranformStates, state => state != null && state.Tick == serverState.Tick);
+        if (bufferIndex == -1) {
+            return;
+        }
         TransformState calculatedState = this._tranformStates[bufferIndex];
         if (calculatedState.Position != serverState.Position) {
             this.TeleportPlayer(serverState, bufferIndex);
 
-            IEnumerable<InputState> inputs = this._inputs.Where(input => input.Tick > serverState.Tick).OrderBy(input => input.Tick).ToArray();
+            IEnumerable<InputState> inputs = this._inputs.Where(input => input != null && input.Tick > serverState.Tick).OrderBy(input => input.Tick).ToArray();
             foreach (InputState input in inputs) {
                 MovePlayer(input.MovementInput);
                 RotatePlayer(input.LookInput);
@@ -66,7 +69,7 @@ public class PlayerMovement : NetworkBehaviour {
                     Rotation = this.transform.rotation,
                     IsMoving = true
                 };
-                int index = Array.FindIndex(this._tranformStates, state => state.Tick == serverState.Tick);
+                int index = Array.FindIndex(this._tranformStates, state => state != null && state.Tick == serverState.Tick);
                 this._tranformStates[index] = transformState;
             }
         }
