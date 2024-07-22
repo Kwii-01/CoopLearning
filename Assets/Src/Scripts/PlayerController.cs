@@ -31,6 +31,8 @@ public class PlayerController : MonoBehaviour {
         if (this._type == Type_e.Played) {
             Vector2 moveDirection = this._moveAction.ReadValue<Vector2>();
             Vector2 lookDirection = this._lookAtAction.ReadValue<Vector2>();
+            //Vector2 moveDirection = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+            // Debug.Log(moveDirection + " " + lookDirection);
             this._movements.LocalMovement(moveDirection, lookDirection);
         } else if (this._type == Type_e.Simulated) {
             this._movements.SimulateMovement();
@@ -43,9 +45,11 @@ public class PlayerController : MonoBehaviour {
         this._controller.enabled = false;
     }
 
-    public void Played() {
-        this._type = Type_e.Played;
-        this._input.ActivateInput();
+    public void Played(bool IsLocalPlayer) {
+        if (IsLocalPlayer) {
+            this._type = Type_e.Played;
+            this._input.ActivateInput();
+        }
     }
 
 }
