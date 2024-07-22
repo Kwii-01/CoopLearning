@@ -427,6 +427,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: NetworkManager
       objectReference: {fileID: 0}
+    - target: {fileID: 2567179191682964683, guid: 358c8a81b1144429f980e26e71257801, type: 3}
+      propertyPath: NetworkConfig.ConnectionApproval
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 9005023194130575467, guid: 358c8a81b1144429f980e26e71257801, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
