@@ -13,6 +13,7 @@ using UnityEngine.SceneManagement;
 
 using UnityEngine;
 using UnityEngine.Events;
+using Tools;
 
 namespace Network {
     public class LobbyManager : MonoBehaviour {
@@ -22,6 +23,7 @@ namespace Network {
         public UnityEvent onLobbyLeft;
 
         private void Awake() {
+            Singleton.Set(this);
             SteamMatchmaking.OnLobbyCreated += this.OnLobbyCreated;
             SteamMatchmaking.OnLobbyEntered += this.OnLobbyEntered;
             SteamFriends.OnGameLobbyJoinRequested += this.OnGameLobbyJoinRequested;
@@ -57,12 +59,15 @@ namespace Network {
 
         public async void JoinLobby(ulong lobbyID) {
             Lobby[] lobbies = await SteamMatchmaking.LobbyList.WithSlotsAvailable(1).RequestAsync();
+            foreach (Lobby lobb in lobbies) {
+                Debug.Log(lobb.Id);
+            }
             int lobbyIndex = Array.FindIndex(lobbies, lobby => lobby.Id == lobbyID);
             if (lobbyIndex < 0) {
                 //LOBBY NOT FOUND
                 return;
             }
-            await lobbies[lobbyIndex].Join();
+            RoomEnter result = await lobbies[lobbyIndex].Join();
         }
 
         public void LeaveLobby() {
