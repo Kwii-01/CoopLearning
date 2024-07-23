@@ -59,7 +59,10 @@ public class PlayerMovement : NetworkBehaviour {
         if (calculatedState.Position != serverState.Position) {
             this.TeleportPlayer(serverState, bufferIndex);
 
-            IEnumerable<InputState> inputs = this._inputs.Where(input => input != null && input.Tick > serverState.Tick).OrderBy(input => input.Tick).ToArray();
+            IEnumerable<InputState> inputs = this._inputs
+                .Where(input => input != null && (input.Tick > serverState.Tick || input.Tick <= this._tick % BUFFER_SIZE))
+                .OrderBy(input => input.Tick)
+                .ToArray();
             foreach (InputState input in inputs) {
                 MovePlayer(input.MovementInput);
                 RotatePlayer(input.LookInput);
@@ -139,6 +142,9 @@ public class PlayerMovement : NetworkBehaviour {
         this._tranformStates[bufferIndex] = transformState;
         this._tickDeltaTime -= this._tickRate;
         this._tick++;
+        if (this._tick >= BUFFER_SIZE) {
+            this._tick = 0;
+        }
     }
 
     public void SimulateMovement() {
@@ -152,5 +158,8 @@ public class PlayerMovement : NetworkBehaviour {
         }
         this._tickDeltaTime -= this._tickRate;
         this._tick++;
+        if (this._tick >= BUFFER_SIZE) {
+            this._tick = 0;
+        }
     }
 }
