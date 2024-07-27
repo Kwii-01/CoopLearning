@@ -25,14 +25,14 @@ public class PlayerController : MonoBehaviour {
         InputActionMap actionMap = this._input.actions.FindActionMap("Player");
         this._moveAction = actionMap.FindAction("Move");
         this._lookAtAction = actionMap.FindAction("Look");
+        _input.SwitchCurrentControlScheme("Keyboard&Mouse", Keyboard.current, Mouse.current);
+
     }
 
     private void Update() {
         if (this._type == Type_e.Played) {
             Vector2 moveDirection = this._moveAction.ReadValue<Vector2>();
             Vector2 lookDirection = this._lookAtAction.ReadValue<Vector2>();
-            //Vector2 moveDirection = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
-            // Debug.Log(moveDirection + " " + lookDirection);
             this._movements.LocalMovement(moveDirection, lookDirection);
         } else if (this._type == Type_e.Simulated) {
             this._movements.SimulateMovement();

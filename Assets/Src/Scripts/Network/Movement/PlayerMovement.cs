@@ -60,7 +60,7 @@ public class PlayerMovement : NetworkBehaviour {
             this.TeleportPlayer(serverState, bufferIndex);
 
             IEnumerable<InputState> inputs = this._inputs
-                .Where(input => input != null && (input.Tick > serverState.Tick || input.Tick <= this._tick % BUFFER_SIZE))
+                .Where(input => input != null && (input.Tick > serverState.Tick || input.Tick <= this._tick))
                 .OrderBy(input => input.Tick)
                 .ToArray();
             foreach (InputState input in inputs) {
@@ -105,7 +105,7 @@ public class PlayerMovement : NetworkBehaviour {
     }
 
     public override void OnNetworkSpawn() {
-        if (this.IsLocalPlayer == false) {
+        if (this.IsLocalPlayer == false || this.IsHost) {
             return;
         }
         this._serverTransformState.OnValueChanged += this.OnServerStateChanged;
@@ -141,9 +141,10 @@ public class PlayerMovement : NetworkBehaviour {
         this._inputs[bufferIndex] = inputState;
         this._tranformStates[bufferIndex] = transformState;
         this._tickDeltaTime -= this._tickRate;
-        this._tick++;
         if (this._tick >= BUFFER_SIZE) {
             this._tick = 0;
+        } else {
+            this._tick++;
         }
     }
 
@@ -157,9 +158,5 @@ public class PlayerMovement : NetworkBehaviour {
             this.transform.rotation = this._serverTransformState.Value.Rotation;
         }
         this._tickDeltaTime -= this._tickRate;
-        this._tick++;
-        if (this._tick >= BUFFER_SIZE) {
-            this._tick = 0;
-        }
     }
 }

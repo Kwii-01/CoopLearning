@@ -1037,6 +1037,10 @@ PrefabInstance:
       value: NetworkManager  NGO
       objectReference: {fileID: 0}
     - target: {fileID: 2567179191682964683, guid: 358c8a81b1144429f980e26e71257801, type: 3}
+      propertyPath: NetworkConfig.TickRate
+      value: 60
+      objectReference: {fileID: 0}
+    - target: {fileID: 2567179191682964683, guid: 358c8a81b1144429f980e26e71257801, type: 3}
       propertyPath: NetworkConfig.NetworkTransport
       value: 
       objectReference: {fileID: 455224434}
