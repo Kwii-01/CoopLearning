@@ -72,7 +72,7 @@ public class PlayerMovement : NetworkBehaviour {
                     Rotation = this.transform.rotation,
                     IsMoving = true
                 };
-                int index = Array.FindIndex(this._tranformStates, state => state != null && state.Tick == serverState.Tick);
+                int index = Array.FindIndex(this._tranformStates, state => state != null && state.Tick == transformState.Tick);
                 this._tranformStates[index] = transformState;
             }
         }
