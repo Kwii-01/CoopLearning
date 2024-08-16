@@ -151,11 +151,11 @@ GameObject:
   - component: {fileID: 4521063671100777202}
   - component: {fileID: 4053994992739839072}
   - component: {fileID: 4517748194254128618}
-  - component: {fileID: 7754389373502121338}
-  - component: {fileID: 1762609311934651968}
-  - component: {fileID: 6824935822059434859}
+  - component: {fileID: 1292309818753013725}
+  - component: {fileID: 6078228254044990031}
+  - component: {fileID: 4771620593437716227}
   m_Layer: 0
-  m_Name: Player
+  m_Name: Player 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -190,7 +190,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 1062459524
+  GlobalObjectIdHash: 3628209659
   InScenePlacedSourceGlobalObjectIdHash: 1062459524
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
@@ -307,7 +307,7 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 1, z: 0}
---- !u!114 &7754389373502121338
+--- !u!114 &1292309818753013725
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -316,12 +316,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 7600910902671240839}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2e548a80c53f04dc1b8dcf45826478c7, type: 3}
+  m_Script: {fileID: 11500000, guid: b8122cc2e510946fd997d62d86f7ccd1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _controller: {fileID: 1762609311934651968}
-  _vcam: {fileID: 8950579291995817429}
---- !u!114 &1762609311934651968
+  _playerInput: {fileID: 6078228254044990031}
+  _playerMovement: {fileID: 4771620593437716227}
+  _thresholdPositionReconciliation: 1
+--- !u!114 &6078228254044990031
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -330,13 +331,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 7600910902671240839}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3199d089a04b24fe2a8c904f9a4638a7, type: 3}
+  m_Script: {fileID: 11500000, guid: 050ba8f7147b54d66b5933623fa701bd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _input: {fileID: 4053994992739839072}
-  _controller: {fileID: 4517748194254128618}
-  _movements: {fileID: 6824935822059434859}
---- !u!114 &6824935822059434859
+--- !u!114 &4771620593437716227
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -345,7 +344,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 7600910902671240839}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 47bafaa16bc39437ea07eaf1afc3b2e4, type: 3}
+  m_Script: {fileID: 11500000, guid: e959caf1c29794fc287a3843a61037f7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _controller: {fileID: 4517748194254128618}
