@@ -3,15 +3,19 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
+using Cinemachine;
+
 using Unity.Netcode;
 
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Tools;
 
 namespace Network.V2 {
     public class NetworkPlayer : NetworkBehaviour {
         [SerializeField] private NetworkPlayerInput _playerInput;
         [SerializeField] private PlayerMovement _playerMovement;
+        [SerializeField] private CinemachineVirtualCamera _vCam;
 
         private Tick _tick;
         private CircularBuffer<InputState> _inputs;
@@ -30,7 +34,13 @@ namespace Network.V2 {
         public override void OnNetworkSpawn() {
             base.OnNetworkSpawn();
             this._playerInput.enabled = this.IsLocalPlayer;
-            if (this.IsLocalPlayer == false || this.IsHost) {
+            if (this.IsLocalPlayer == false) {
+                return;
+            }
+            CinemachineVirtualCamera cam = Instantiate(this._vCam);
+            cam.m_Follow = this.transform;
+            cam.m_LookAt = this.transform;
+            if (this.IsHost) {
                 return;
             }
             this._serverTransformState.OnValueChanged += this.OnServerStateChanged;
@@ -51,7 +61,6 @@ namespace Network.V2 {
             TransformState calculatedState = this._transforms[bufferIndex];
 
             if (calculatedState.Position != newValue.Position) {
-
                 this._playerMovement.TeleportPlayer(newValue.Position);
                 this._transforms[bufferIndex] = newValue;
 
@@ -83,6 +92,8 @@ namespace Network.V2 {
         [ServerRpc]
         private void MovePlayerServerRpc(InputState inputState) {
             Vector2 moveInput = new Vector2(inputState.MoveX.DequantizeShort(-1f, 1f), inputState.MoveY.DequantizeShort(-1f, 1f));
+            moveInput.x = Mathf.Abs(moveInput.x) < .001f ? 0f : moveInput.x;
+            moveInput.y = Mathf.Abs(moveInput.y) < .001f ? 0f : moveInput.y;
             this.MovePlayerOnServer(inputState.Tick, moveInput);
         }
 
@@ -124,6 +135,7 @@ namespace Network.V2 {
                 } else if (this.IsHost == false) {
                     this.SimulatePlayer();
                 }
+                this._playerMovement.UpdateServer(this._tick.Delta);
             }
         }
     }
