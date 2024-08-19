@@ -52,6 +52,34 @@ namespace Network.V2 {
             this._serverTransformState.OnValueChanged -= this.OnServerStateChanged;
         }
 
+        private TransformState CreateState(int tick, Vector2 moveInput) {
+            return new() {
+                Tick = tick,
+                Position = this.transform.position,
+                Rotation = this.transform.rotation.y,
+                IsMoving = moveInput != Vector2.zero
+            };
+        }
+
+        private void Reconciliate(int tickIndex, TransformState serverState) {
+            this._playerMovement.TeleportPlayer(serverState.Position);
+            this._transforms[tickIndex] = serverState;
+
+            Vector2 moveInput;
+            int inputsToReplay = tickIndex > this._tick ? BUFFER_SIZE - tickIndex + this._tick : this._tick - tickIndex;
+            int total = tickIndex + inputsToReplay;
+            int currentTick;
+            for (int i = tickIndex; i < total; i++) {
+                currentTick = this._inputs[i].Tick;
+                moveInput = new Vector2(this._inputs[i].MoveX.DequantizeShort(-1f, 1f), this._inputs[i].MoveY.DequantizeShort(-1f, 1f));
+                moveInput.x = Mathf.Abs(moveInput.x) < .001f ? 0f : moveInput.x;
+                moveInput.y = Mathf.Abs(moveInput.y) < .001f ? 0f : moveInput.y;
+                this._playerMovement.MovePlayer(moveInput, this._tick.Delta);
+                this._playerMovement.SetRotation(this._transforms[currentTick].Rotation);
+                this._transforms[currentTick] = this.CreateState(currentTick, moveInput);
+            }
+        }
+
         // RECONCILIATE HERE
         private void OnServerStateChanged(TransformState previousValue, TransformState newValue) {
             int bufferIndex = newValue.Tick;
@@ -59,41 +87,14 @@ namespace Network.V2 {
                 return;
             }
             TransformState calculatedState = this._transforms[bufferIndex];
-
             if (calculatedState.Position != newValue.Position) {
-                this._playerMovement.TeleportPlayer(newValue.Position);
-                this._transforms[bufferIndex] = newValue;
-
-                Vector2 moveInput;
-                int diff = bufferIndex > this._tick ? BUFFER_SIZE - bufferIndex + this._tick : this._tick - bufferIndex;
-                int total = bufferIndex + diff;
-                for (int i = bufferIndex; i < total; i++) {
-                    moveInput = new Vector2(this._inputs[i].MoveX.DequantizeShort(-1f, 1f), this._inputs[i].MoveY.DequantizeShort(-1f, 1f));
-                    moveInput.x = Mathf.Abs(moveInput.x) < .001f ? 0f : moveInput.x;
-                    moveInput.y = Mathf.Abs(moveInput.y) < .001f ? 0f : moveInput.y;
-                    this._playerMovement.MovePlayer(moveInput, this._tick.Delta);
-                    this._playerMovement.SetRotation(this._transforms[this._inputs[i].Tick].Rotation);
-                    TransformState transformState = new() {
-                        Tick = this._inputs[i].Tick,
-                        Position = this.transform.position,
-                        Rotation = this.transform.rotation.y,
-                        IsMoving = moveInput != Vector2.zero
-                    };
-                    this._transforms[this._inputs[i].Tick] = transformState;
-                }
+                this.Reconciliate(bufferIndex, newValue);
             }
         }
 
         private void MovePlayerOnServer(int tick, Vector2 moveInput) {
             this._playerMovement.MovePlayer(moveInput, this._tick.Delta);
-
-            TransformState transformState = new TransformState {
-                Tick = tick,
-                Position = this.transform.position,
-                Rotation = this.transform.rotation.y,
-                IsMoving = moveInput != Vector2.zero
-            };
-            this._serverTransformState.Value = transformState;
+            this._serverTransformState.Value = this.CreateState(tick, moveInput);
         }
 
         [ServerRpc]
@@ -121,19 +122,8 @@ namespace Network.V2 {
                 this.MovePlayerOnServer(this._tick, moveInput);
             }
 
-            TransformState transformState = new TransformState {
-                Tick = this._tick,
-                Position = this.transform.position,
-                Rotation = this.transform.rotation.y,
-                IsMoving = moveInput != Vector2.zero
-            };
-
             this._inputs[bufferIndex] = input;
-            this._transforms[bufferIndex] = transformState;
-        }
-
-        private void SimulatePlayer() {
-            this._playerMovement.SimulatePlayer(this._serverTransformState.Value);
+            this._transforms[bufferIndex] = this.CreateState(this._tick, moveInput);
         }
 
         private void Update() {
@@ -142,7 +132,7 @@ namespace Network.V2 {
                 if (this.IsLocalPlayer) {
                     this.UpdateLocalPlayer();
                 } else if (this.IsHost == false) {
-                    this.SimulatePlayer();
+                    this._playerMovement.SimulatePlayer(this._serverTransformState.Value);
                 }
                 this._playerMovement.UpdateOnServerTick(this._tick.Delta);
             }
