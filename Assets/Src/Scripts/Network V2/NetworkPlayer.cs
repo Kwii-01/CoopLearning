@@ -69,10 +69,15 @@ namespace Network.V2 {
                 int total = bufferIndex + diff;
                 for (int i = bufferIndex; i < total; i++) {
                     moveInput = new Vector2(this._inputs[i].MoveX.DequantizeShort(-1f, 1f), this._inputs[i].MoveY.DequantizeShort(-1f, 1f));
+                    moveInput.x = Mathf.Abs(moveInput.x) < .001f ? 0f : moveInput.x;
+                    moveInput.y = Mathf.Abs(moveInput.y) < .001f ? 0f : moveInput.y;
                     this._playerMovement.MovePlayer(moveInput, this._tick.Delta);
+                    this._playerMovement.SetRotation(this._transforms[this._inputs[i].Tick].Rotation);
                     TransformState transformState = new() {
                         Tick = this._inputs[i].Tick,
-                        Position = this.transform.position
+                        Position = this.transform.position,
+                        Rotation = this.transform.rotation.y,
+                        IsMoving = moveInput != Vector2.zero
                     };
                     this._transforms[this._inputs[i].Tick] = transformState;
                 }
@@ -84,7 +89,9 @@ namespace Network.V2 {
 
             TransformState transformState = new TransformState {
                 Tick = tick,
-                Position = this.transform.position
+                Position = this.transform.position,
+                Rotation = this.transform.rotation.y,
+                IsMoving = moveInput != Vector2.zero
             };
             this._serverTransformState.Value = transformState;
         }
@@ -116,7 +123,9 @@ namespace Network.V2 {
 
             TransformState transformState = new TransformState {
                 Tick = this._tick,
-                Position = this.transform.position
+                Position = this.transform.position,
+                Rotation = this.transform.rotation.y,
+                IsMoving = moveInput != Vector2.zero
             };
 
             this._inputs[bufferIndex] = input;
@@ -124,7 +133,7 @@ namespace Network.V2 {
         }
 
         private void SimulatePlayer() {
-            this._playerMovement.SimulatePlayer(this._serverTransformState.Value.Position);
+            this._playerMovement.SimulatePlayer(this._serverTransformState.Value);
         }
 
         private void Update() {
@@ -135,7 +144,7 @@ namespace Network.V2 {
                 } else if (this.IsHost == false) {
                     this.SimulatePlayer();
                 }
-                this._playerMovement.UpdateServer(this._tick.Delta);
+                this._playerMovement.UpdateOnServerTick(this._tick.Delta);
             }
         }
     }
