@@ -20,13 +20,13 @@ namespace Network.V2 {
         }
     }
 
-    public static class Quantize {
-        public static short QuantizeFloat(this float value, float min, float max) {
-            return (short)((value - min) / (max - min) * short.MaxValue);
-        }
+}
+public static class Quantize {
+    public static short QuantizeFloat(this float value, float min, float max) {
+        return (short)((value - min) / (max - min) * short.MaxValue);
+    }
 
-        public static float DequantizeShort(this short value, float min, float max) {
-            return min + (value / (float)short.MaxValue) * (max - min);
-        }
+    public static float DequantizeShort(this short value, float min, float max) {
+        return min + (value / (float)short.MaxValue) * (max - min);
     }
 }

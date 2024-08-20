@@ -20,6 +20,14 @@ namespace Network.V2 {
             this._controller.Move(Vector3.up * -9.81f * Time.deltaTime);
         }
 
+        private void RotatePlayerTowardMove(Vector2 moveInput, float tickRate) {
+            if (moveInput == Vector2.zero) {
+                return;
+            }
+            Vector3 direction = new Vector3(moveInput.x, 0f, moveInput.y);
+            this.transform.rotation = Quaternion.RotateTowards(this.transform.rotation, Quaternion.LookRotation(direction), this._turnSpeed * tickRate);
+        }
+
         private void Update() {
             this.Gravity();
         }
@@ -35,14 +43,6 @@ namespace Network.V2 {
         public void UpdateOnServerTick(float tickRate) {
             this._animator.SetBool("Moving", _lastInput != Vector2.zero);
             this.RotatePlayerTowardMove(_lastInput, tickRate);
-        }
-
-        public void RotatePlayerTowardMove(Vector2 moveInput, float tickRate) {
-            if (moveInput == Vector2.zero) {
-                return;
-            }
-            Vector3 direction = new Vector3(moveInput.x, 0f, moveInput.y);
-            this.transform.rotation = Quaternion.RotateTowards(this.transform.rotation, Quaternion.LookRotation(direction), this._turnSpeed * tickRate);
         }
 
         public void TeleportPlayer(Vector3 position) {

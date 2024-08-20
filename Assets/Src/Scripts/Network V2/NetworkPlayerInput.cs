@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 
+using Unity.Netcode;
+
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -18,13 +20,8 @@ namespace Network.V2 {
             InputActionMap actionMap = this._input.actions.FindActionMap("Player");
             this._moveAction = actionMap.FindAction("Move");
             this._lookAtAction = actionMap.FindAction("Look");
-            actionMap.FindAction("Jump").performed += this.OnJumpPressed;
-            _input.SwitchCurrentControlScheme("Keyboard&Mouse", Keyboard.current, Mouse.current);
-
-        }
-
-        private void OnJumpPressed(InputAction.CallbackContext context) {
-
+            // TEMP => for testing purpose
+            this._input.SwitchCurrentControlScheme("Keyboard&Mouse", Keyboard.current, Mouse.current);
         }
 
         private void OnEnable() {
