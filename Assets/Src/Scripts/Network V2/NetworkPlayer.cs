@@ -13,9 +13,11 @@ using Tools;
 
 namespace Network.V2 {
     public class NetworkPlayer : NetworkBehaviour {
-        [SerializeField] private NetworkPlayerInput _playerInput;
         [SerializeField] private PlayerMovement _playerMovement;
         [SerializeField] private CinemachineVirtualCamera _vCam;
+        [SerializeField] private PlayerInput _input;
+
+        private InputAction _moveAction;
 
         private Tick _tick;
         private CircularBuffer<InputState> _inputs;
@@ -28,15 +30,20 @@ namespace Network.V2 {
             this._tick = new Tick(60, BUFFER_SIZE);
             this._inputs = new CircularBuffer<InputState>(BUFFER_SIZE);
             this._transforms = new CircularBuffer<TransformState>(BUFFER_SIZE);
+
+            InputActionMap actionMap = this._input.actions.FindActionMap("Player");
+            this._moveAction = actionMap.FindAction("Move");
+            // TEMP => for testing purpose
+            this._input.SwitchCurrentControlScheme("Keyboard&Mouse", Keyboard.current, Mouse.current);
         }
 
 
         public override void OnNetworkSpawn() {
             base.OnNetworkSpawn();
-            this._playerInput.enabled = this.IsLocalPlayer;
             if (this.IsLocalPlayer == false) {
                 return;
             }
+            this._input.ActivateInput();
             CinemachineVirtualCamera cam = Instantiate(this._vCam);
             cam.m_Follow = this.transform;
             cam.m_LookAt = this.transform;
@@ -80,7 +87,6 @@ namespace Network.V2 {
             }
         }
 
-        // RECONCILIATE HERE
         private void OnServerStateChanged(TransformState previousValue, TransformState newValue) {
             int bufferIndex = newValue.Tick;
             if (bufferIndex == -1) {
@@ -105,9 +111,9 @@ namespace Network.V2 {
             this.MovePlayerOnServer(inputState.Tick, moveInput);
         }
 
-        private void UpdateLocalPlayer() {
+        private void UpdateClientLocalPlayer() {
             int bufferIndex = this._tick;
-            Vector2 moveInput = this._playerInput.MoveInput;
+            Vector2 moveInput = this._moveAction.ReadValue<Vector2>();
 
             InputState input = new InputState {
                 Tick = this._tick,
@@ -115,24 +121,31 @@ namespace Network.V2 {
                 MoveY = moveInput.y.QuantizeFloat(-1f, 1f)
             };
 
-            if (this.IsServer == false) {
-                this.MovePlayerServerRpc(input);
-                this._playerMovement.MovePlayer(moveInput, this._tick.Delta);
-            } else {
-                this.MovePlayerOnServer(this._tick, moveInput);
-            }
+            this.MovePlayerServerRpc(input);
+            this._playerMovement.MovePlayer(moveInput, this._tick.Delta);
 
             this._inputs[bufferIndex] = input;
             this._transforms[bufferIndex] = this.CreateState(this._tick, moveInput);
         }
 
+        private void UpdateHostLocalPlayer() {
+            Vector2 moveInput = this._moveAction.ReadValue<Vector2>();
+            this.MovePlayerOnServer(this._tick, moveInput);
+        }
+
+        private void UpdateGhostPlayer() {
+            this._playerMovement.SimulatePlayer(this._serverTransformState.Value);
+        }
+
         private void Update() {
             this._tick.Update(Time.deltaTime);
             while (this._tick.CanTick()) {
-                if (this.IsLocalPlayer) {
-                    this.UpdateLocalPlayer();
+                if (this.IsHost && this.IsLocalPlayer) {
+                    this.UpdateHostLocalPlayer();
+                } else if (this.IsLocalPlayer) {
+                    this.UpdateClientLocalPlayer();
                 } else if (this.IsHost == false) {
-                    this._playerMovement.SimulatePlayer(this._serverTransformState.Value);
+                    this.UpdateGhostPlayer();
                 }
                 this._playerMovement.UpdateOnServerTick(this._tick.Delta);
             }

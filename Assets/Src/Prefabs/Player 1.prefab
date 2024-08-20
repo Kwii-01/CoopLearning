@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 4053994992739839072}
   - component: {fileID: 4517748194254128618}
   - component: {fileID: 1292309818753013725}
-  - component: {fileID: 6078228254044990031}
   - component: {fileID: 4771620593437716227}
   m_Layer: 0
   m_Name: Player 1
@@ -179,21 +178,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8122cc2e510946fd997d62d86f7ccd1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _playerInput: {fileID: 6078228254044990031}
   _playerMovement: {fileID: 4771620593437716227}
   _vCam: {fileID: 9058355367365044552, guid: a71611f2aadcd40c382196ecfa8cf91d, type: 3}
---- !u!114 &6078228254044990031
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7600910902671240839}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 050ba8f7147b54d66b5933623fa701bd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
   _input: {fileID: 4053994992739839072}
 --- !u!114 &4771620593437716227
 MonoBehaviour:
