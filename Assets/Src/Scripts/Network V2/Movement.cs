@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace Network.V2 {
-    public class PlayerMovement : MonoBehaviour {
+    public class Movement : MonoBehaviour {
         [SerializeField] private CharacterController _controller;
         [SerializeField] private Animator _animator;
         [SerializeField] private float _speed;

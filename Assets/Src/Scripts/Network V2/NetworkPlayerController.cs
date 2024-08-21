@@ -12,19 +12,21 @@ using UnityEngine.InputSystem;
 using Tools;
 
 namespace Network.V2 {
-    public class NetworkPlayer : NetworkBehaviour {
-        [SerializeField] private PlayerMovement _playerMovement;
+    public class NetworkPlayerController : NetworkBehaviour {
         [SerializeField] private CinemachineVirtualCamera _vCam;
+
+        /// <summary>
+        ///  MOVEMENT GESTION
+        /// </summary>
+        [SerializeField] private Movement _playerMovement;
         [SerializeField] private PlayerInput _input;
-
         private InputAction _moveAction;
-
         private Tick _tick;
         private CircularBuffer<InputState> _inputs;
         private CircularBuffer<TransformState> _transforms;
-
         private NetworkVariable<TransformState> _serverTransformState = new();
         private const int BUFFER_SIZE = 1024;
+
 
         private void Awake() {
             this._tick = new Tick(60, BUFFER_SIZE);
@@ -35,28 +37,6 @@ namespace Network.V2 {
             this._moveAction = actionMap.FindAction("Move");
             // TEMP => for testing purpose
             this._input.SwitchCurrentControlScheme("Keyboard&Mouse", Keyboard.current, Mouse.current);
-        }
-
-
-        public override void OnNetworkSpawn() {
-            base.OnNetworkSpawn();
-            if (this.IsLocalPlayer == false) {
-                return;
-            }
-            this._input.ActivateInput();
-            CinemachineVirtualCamera cam = Instantiate(this._vCam);
-            cam.m_Follow = this.transform;
-            cam.m_LookAt = this.transform;
-            if (this.IsHost) {
-                return;
-            }
-            this._serverTransformState.OnValueChanged += this.OnServerStateChanged;
-        }
-
-
-        public override void OnNetworkDespawn() {
-            base.OnNetworkDespawn();
-            this._serverTransformState.OnValueChanged -= this.OnServerStateChanged;
         }
 
         private TransformState CreateState(int tick, Vector2 moveInput) {
@@ -149,6 +129,47 @@ namespace Network.V2 {
                 }
                 this._playerMovement.UpdateOnServerTick(this._tick.Delta);
             }
+        }
+
+        [ServerRpc]
+        private void SendActionServerRpc(ActionRequestData actionRequestData) {
+            // VALIDATE ACTION ON SERVER
+
+            // PLAY ACTION IF OK
+
+            //this.SendCancelActionClientRpc(actionRequestData.ActionID);
+        }
+
+        [ClientRpc]
+        private void SendCancelActionClientRpc(int actionID) {
+
+        }
+
+        public override void OnNetworkSpawn() {
+            base.OnNetworkSpawn();
+            if (this.IsLocalPlayer == false) {
+                return;
+            }
+            this._input.ActivateInput();
+            CinemachineVirtualCamera cam = Instantiate(this._vCam);
+            cam.m_Follow = this.transform;
+            cam.m_LookAt = this.transform;
+            if (this.IsHost) {
+                return;
+            }
+            this._serverTransformState.OnValueChanged += this.OnServerStateChanged;
+        }
+
+
+        public override void OnNetworkDespawn() {
+            base.OnNetworkDespawn();
+            this._serverTransformState.OnValueChanged -= this.OnServerStateChanged;
+        }
+
+        public void SendAction(ActionRequestData requestData) {
+            // VALIDATE ACTION LOCALY
+            this.SendActionServerRpc(requestData);
+            // PLAY ACTION
         }
     }
 }
