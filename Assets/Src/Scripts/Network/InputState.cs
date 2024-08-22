@@ -7,7 +7,7 @@ using Unity.Netcode;
 
 using UnityEngine;
 
-namespace Network.V2 {
+namespace Network {
     public class InputState : INetworkSerializable {
         public int Tick;
         public short MoveX;

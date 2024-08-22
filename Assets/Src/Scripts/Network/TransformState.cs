@@ -5,7 +5,7 @@ using Unity.Netcode;
 
 using UnityEngine;
 
-namespace Network.V2 {
+namespace Network {
     public class TransformState : INetworkSerializable {
         public int Tick;
         public Vector3 Position;

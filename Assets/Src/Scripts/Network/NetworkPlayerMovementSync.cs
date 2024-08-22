@@ -3,8 +3,6 @@ using System.Collections.Generic;
 
 using Chara;
 
-using Network.V2;
-
 using Tools;
 
 using Unity.Netcode;
@@ -13,6 +11,9 @@ using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Network {
+    /// <summary>
+    /// Manage network movement for the player
+    /// </summary>
     [RequireComponent(typeof(NetworkPlayerInput))]
     public class NetworkPlayerMovementSync : NetworkBehaviour {
 
