@@ -10,10 +10,12 @@ namespace Chara {
             set;
         }
 
-        public void SetDeltaTime(float deltaTime);
-        public void Move(Vector3 direction);
-        public void Rotate(Vector3 direction);
+
+        public void Move(Vector3 direction, float deltaTime);
+        public void Rotate(Vector3 direction, float deltaTime);
         public void Teleport(Vector3 position);
         public void Stop();
+
+        public void OnUpdate(float deltaTime);
     }
 }
