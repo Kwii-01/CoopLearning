@@ -40,7 +40,7 @@ namespace Network {
             return new() {
                 Tick = tick,
                 Position = this.transform.position,
-                Rotation = this.transform.rotation.y,
+                Rotation = this.transform.eulerAngles.y,
                 IsMoving = moveInput != Vector2.zero
             };
         }
